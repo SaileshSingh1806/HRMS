@@ -7,6 +7,7 @@ namespace HRMS.DTO
     public class LeaveRequestDTO
     {
 
+       
         public int LeaveId { get; set; }
         public string RequestedBy { get; set; }
 

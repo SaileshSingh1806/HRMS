@@ -33,7 +33,26 @@ namespace HRMS.Controllers
             return Ok(usersReadDto);
         }
 
-        
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateLeave(int id, LeaveRequestDTO leavereqdto)
+        {
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+            var requpd = await context.LeaveRequest.FindAsync(id);
+            requpd.Status = leavereqdto.Status;
+            requpd.ApprovedDate = leavereqdto.ApprovedDate; 
+            requpd.ApprovedBy = leavereqdto.ApprovedBy; 
+            context.LeaveRequest.Update(requpd);
+            await context.SaveChangesAsync();
+            //mapper.Map(leavereqdto, requpd);
+            //context.Entry(requpd).State = EntityState.Modified;
+            //await context.SaveChangesAsync();
+            return Ok(leavereqdto);
+
+          
+        }
     }
         
 }

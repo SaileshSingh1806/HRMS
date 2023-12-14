@@ -58,7 +58,6 @@ namespace HRMS.Controllers
                 return BadRequest();
             }
             context.Entry(emp).State = EntityState.Modified;
-            await context.SaveChangesAsync();
             return Ok(emp);
         }
        

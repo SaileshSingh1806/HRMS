@@ -7,7 +7,7 @@ namespace HRMS.Models
     public class Leave
     {
         [Key]
-        public int Id { get; set; }
+        public int Id {     get; set; }
 
         public bool isFullDay { get; set; }
 
@@ -19,7 +19,7 @@ namespace HRMS.Models
 
         public string Reason { get; set; }
 
-        public ICollection<LeaveRequest> LeaveRequests { get; set; }
+        public IEnumerable<LeaveRequest> LeaveRequests { get; set; }
 
     }
 }

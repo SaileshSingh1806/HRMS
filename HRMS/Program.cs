@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,12 +23,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<HRMSDbContext>()
     .AddDefaultTokenProviders();
 
-//Json
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-);
+// Json Converter
+builder.Services.AddControllers().AddJsonOptions(x =>
+{
+    // serialize enums as strings in api responses (e.g. Role)
+    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 
-
+    // ignore omitted parameters on models to enable optional params (e.g. User update)
+    x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
 
 // Adding Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

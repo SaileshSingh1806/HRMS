@@ -5,7 +5,6 @@ namespace HRMS.DTO
 {
     public class LeaveDTO
     {
-       
         public bool isFullDay { get; set; }
 
         public bool isMultipleDay { get; set; }
@@ -16,7 +15,7 @@ namespace HRMS.DTO
 
         public string Reason { get; set; }
 
-        public ICollection<LeaveRequestDTO> LeaveRequests { get; set; }
+        public IEnumerable<LeaveRequestDTO> LeaveRequests { get; set; }
 
     }
 

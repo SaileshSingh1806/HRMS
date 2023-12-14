@@ -45,7 +45,27 @@ namespace HRMS.Controllers
             return Ok(model);
         }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateLeave(int id, LeaveDTO leavedto)
+        {
+            var upd = await context.Leave.FindAsync(id);
+            if (id == 0)
+            {
+                return BadRequest();
+            }
 
+
+            upd.isFullDay = leavedto.isFullDay;
+            upd.isMultipleDay  = leavedto.isMultipleDay;    
+            upd.FromDate = leavedto.FromDate;
+            upd.ToDate = leavedto.ToDate;   
+            upd.Reason = leavedto.Reason;   
+            context.Leave.Update(upd);  
+            await context.SaveChangesAsync();
+            return Ok(leavedto);
+
+
+        }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<LeaveDTO>> DeleteLeave(int id)
@@ -59,5 +79,7 @@ namespace HRMS.Controllers
             await context.SaveChangesAsync();
             return Ok(del);
         }
+
     }
 }
+
