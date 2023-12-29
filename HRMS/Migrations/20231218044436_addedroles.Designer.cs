@@ -4,6 +4,7 @@ using HRMS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRMS.Migrations
 {
     [DbContext(typeof(HRMSDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231218044436_addedroles")]
+    partial class addedroles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,28 +254,28 @@ namespace HRMS.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3e9fafb5-789f-46fb-a7f4-bb104a980e70",
+                            Id = "725c88e8-ef98-4363-8000-06eac17793f4",
                             ConcurrencyStamp = "1",
-                            Name = "Admin",
-                            NormalizedName = "Admin"
+                            Name = "Administrator",
+                            NormalizedName = "Administrator"
                         },
                         new
                         {
-                            Id = "01845f0b-4bbe-4ad4-8675-9b9ad5e8ddfe",
+                            Id = "9dae3f78-2ca4-4c40-8948-a7eda7735fb3",
                             ConcurrencyStamp = "2",
                             Name = "Employee",
                             NormalizedName = "Employee"
                         },
                         new
                         {
-                            Id = "6b5a9f65-c631-4209-938e-c6428351c130",
+                            Id = "ffc4145c-1a3e-4c6b-9420-daf4f3d19fba",
                             ConcurrencyStamp = "3",
                             Name = "HR",
                             NormalizedName = "HR"
                         },
                         new
                         {
-                            Id = "304a1cba-af86-4d4e-90dc-f377480331b3",
+                            Id = "3321e552-f6c5-4935-a869-e5d968126589",
                             ConcurrencyStamp = "4",
                             Name = "Manager",
                             NormalizedName = "Manager"

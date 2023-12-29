@@ -5,6 +5,8 @@ namespace HRMS.Models
     public partial class Employee
     {
         public int Id { get; set; }
+        public ApplicationUser User { get; set; }
+        public string? UserId { get; set; }
         public string? Name { get; set; }
         public DateTime? BirthDate { get; set; }
         public string? BloodGroup { get; set; }
@@ -20,7 +22,6 @@ namespace HRMS.Models
         public string? AssignedManager { get; set; }
         public string? Status { get; set; }
         public DateTime? ActiveForm { get; set; }
-        public ApplicationUser User { get; set; }
-        public string? UserId { get; set; }
+     
     }
 }

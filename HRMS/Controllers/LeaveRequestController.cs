@@ -42,8 +42,6 @@ namespace HRMS.Controllers
             }
             var requpd = await context.LeaveRequest.FindAsync(id);
             requpd.Status = leavereqdto.Status;
-            requpd.ApprovedDate = leavereqdto.ApprovedDate; 
-            requpd.ApprovedBy = leavereqdto.ApprovedBy; 
             context.LeaveRequest.Update(requpd);
             await context.SaveChangesAsync();
             //mapper.Map(leavereqdto, requpd);

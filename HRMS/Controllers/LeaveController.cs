@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿        using AutoMapper;
 using HRMS.Data;
 using HRMS.DTO;
 using HRMS.Migrations;
@@ -42,7 +42,7 @@ namespace HRMS.Controllers
             var model = mapper.Map<Leave>(leave);
             await context.Leave.AddAsync(model);
             await context.SaveChangesAsync();
-            return Ok(model);
+            return Ok(leave);
         }
 
         [HttpPut("{id}")]

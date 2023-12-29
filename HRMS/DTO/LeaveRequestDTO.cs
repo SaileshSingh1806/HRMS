@@ -16,10 +16,6 @@ namespace HRMS.DTO
         public string AppliedTo { get; set; }
 
         public Status Status { get; set; }
-        public string? ApprovedBy { get; set; } 
-
-        public DateTime? ApprovedDate { get; set; }     
-        
        
     }
 }
