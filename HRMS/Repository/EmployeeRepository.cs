@@ -33,10 +33,10 @@ namespace HRMS.Repository
 
         }
 
-        public async Task<List<Employee>> GetEmployee()
+        public async Task <List<Employee>>  GetEmployee()
         {
-            var data = await context.Employees.ToListAsync();
-            return data;
+            return await context.Employees.ToListAsync();
+             
         }   
 
         public Task<List<Employee>> GetEmployeeById(int id)

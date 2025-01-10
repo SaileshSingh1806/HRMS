@@ -4,6 +4,8 @@ using HRMS.DTO;
 using HRMS.Migrations;
 using HRMS.Models;
 using HRMS.Repository.Interface;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ namespace HRMS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class EmployeeController : ControllerBase
     {
         private readonly HRMSDbContext context;
@@ -23,13 +26,6 @@ namespace HRMS.Controllers
             this.mapper = mapper;
             this.employeerepo = employeerepo;   
 
-        }
-
-        [HttpGet]
-        public async Task <List<Employee>> GetEmployee()
-        {
-            var data = await employeerepo.GetEmployee();
-            return data;
         }
 
         [HttpPost]
@@ -48,7 +44,7 @@ namespace HRMS.Controllers
             var data = await context.Employees.FindAsync(id);
             if (data == null)
             {
-                return NotFound();
+                return NotFound("The requested resource could not be found.");
             }
             return Ok(data);
         }

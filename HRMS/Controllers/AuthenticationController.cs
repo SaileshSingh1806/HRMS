@@ -7,6 +7,7 @@ using HRMS.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
@@ -100,15 +101,6 @@ namespace HRMS.Controllers
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
-
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["JWT:ValidIssuer"],
-                    audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddHours(3),
-                    claims: authClaims,
-                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                    );
                 //TwoFactor
                 if (user.TwoFactorEnabled)
                 {
@@ -119,12 +111,6 @@ namespace HRMS.Controllers
 
                     return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = $"We Have Sent an OTP To Your Email {user.Email}" });
                 }
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo,
-                    User = user.UserName
-                });
 
             }
             return Unauthorized();
@@ -189,26 +175,40 @@ namespace HRMS.Controllers
                      {
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("sup", user.Id)
                       };
                         foreach (var userRole in userRoles)
                         {
                             authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                         }
+                        var issuer = _configuration["Jwt:Issuer"];
+                        var audience = _configuration["Jwt:Audience"];
+                        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+                        var signingCredentials = new SigningCredentials(
+                                                new SymmetricSecurityKey(key),
+                                                SecurityAlgorithms.HmacSha512Signature
+                                            );
+                        var subject = new ClaimsIdentity(new[]
+{
+new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+new Claim(JwtRegisteredClaimNames.Email, user.UserName),
+new Claim("sup", user.Id),
+});
+                        var tokenDescriptor = new SecurityTokenDescriptor
+                        {
+                            Subject = subject,
+                            Expires = DateTime.UtcNow.AddMinutes(10),
+                            Issuer = issuer,
+                            Audience = audience,
+                            SigningCredentials = signingCredentials
+                        };
 
-                        var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
-
-                        var token = new JwtSecurityToken(
-                            issuer: _configuration["JWT:ValidIssuer"],
-                            audience: _configuration["JWT:ValidAudience"],
-                            expires: DateTime.Now.AddHours(3),
-                            claims: authClaims,
-                            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                            );
-
+                        var tokenHandler = new JwtSecurityTokenHandler();
+                        var token = tokenHandler.CreateToken(tokenDescriptor);
+                        var jwtToken = tokenHandler.WriteToken(token);
                         return Ok(new
                         {
-                            token = new JwtSecurityTokenHandler().WriteToken(token),
-                            expiration = token.ValidTo,
+                            token = tokenHandler.WriteToken(token),
                             User = user.UserName
                         });
                     }
@@ -225,48 +225,36 @@ namespace HRMS.Controllers
             var user = await userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                var token = await userManager.GeneratePasswordResetTokenAsync(user);
-                var forgetPasswordLink = Url.Action(nameof(ResetPassword), "Authentication", new { token, email = user.Email }, Request.Scheme);
-                var message = new EmailMessage(new string[] { user.Email! }, "Forgot Password Link", forgetPasswordLink!);
+                var token = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+                var forgetPasswordLink = token;
+                var message = new EmailMessage(new string[] { user.Email! }, $"Your Password Reset Code Is", forgetPasswordLink!);
                 emailService.SendEmail(message);
 
-                return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = $"Password Change request is sent on Email {user.Email}.Please Open your email & click the link" });
+                return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = $"Change Password request is sent on Email {user.Email}. Please Check your email" });
 
             }
             return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = $"Couldnot send link to email, please try again." });
-        }
-
-        [HttpGet("reset-password")]
-        public async Task<IActionResult> ResetPasswordModel(string token, string email)
-        {
-            var model = new ResetPasswordModel { Token = token, Email = email };
-            return Ok(new
-            {
-                model
-            });
         }
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordModel resetPassword)
+        [Route("Forgot-password-validate")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel resetPassword, string code)
         {
             var user = await userManager.FindByEmailAsync(resetPassword.Email);
             if (user != null)
             {
-                var resetPassResult = await userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.Password);
-                if (!resetPassResult.Succeeded)
+                var check = await userManager.VerifyTwoFactorTokenAsync(user, "Email", code);
+                if (check == true)
                 {
-                    foreach (var error in resetPassResult.Errors)
-                    {
-                        ModelState.AddModelError(error.Code, error.Description);
-                    }
-                    return Ok(ModelState);
+                    var pass = await userManager.RemovePasswordAsync(user);
+                    var Change = await userManager.AddPasswordAsync(user, resetPassword.Password);
+
+                    return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = $"Password has been Changed " });
                 }
-                return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = $"Password has been Changed " });
 
             }
-            return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = $"Couldnot send link to email, please try again." });
+            return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = $"Please Check Your Details." });
         }
     }
 }

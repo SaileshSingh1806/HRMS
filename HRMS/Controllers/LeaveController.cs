@@ -3,17 +3,20 @@ using HRMS.Data;
 using HRMS.DTO;
 using HRMS.Migrations;
 using HRMS.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Security.Claims;
 
 namespace HRMS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LeaveController : ControllerBase
     {
         private readonly HRMSDbContext context;
@@ -38,8 +41,9 @@ namespace HRMS.Controllers
         [HttpPost]
         public async Task<ActionResult> PostLeave(LeaveDTO leave)
         {
-
+            var userid = User.FindFirstValue("sup");
             var model = mapper.Map<Leave>(leave);
+            model.LeaveRequests.FirstOrDefault().RequestedBy = userid;
             await context.Leave.AddAsync(model);
             await context.SaveChangesAsync();
             return Ok(leave);

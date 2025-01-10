@@ -1,7 +1,4 @@
-﻿using HRMS.Models;
-using System.ComponentModel.DataAnnotations;
-
-namespace HRMS.DTO
+﻿namespace HRMS.DTO
 {
     public class LeaveDTO
     {

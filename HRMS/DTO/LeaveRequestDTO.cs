@@ -6,11 +6,6 @@ namespace HRMS.DTO
 {
     public class LeaveRequestDTO
     {
-
-       
-        public int LeaveId { get; set; }
-        public string RequestedBy { get; set; }
-
         public DateTime AppliedDate { get; set; }
 
         public string AppliedTo { get; set; }
